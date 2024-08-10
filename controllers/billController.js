@@ -1,6 +1,8 @@
 const Bill = require('../models/bill');
 const Item = require('../models/item');
+const mongoose = require('mongoose');
 
+// Create a new bill and update inventory
 const createBill = async (req, res) => {
   const session = await mongoose.startSession();
   session.startTransaction();
@@ -32,6 +34,7 @@ const createBill = async (req, res) => {
   }
 };
 
+// Get all bills
 const getBills = async (req, res) => {
   try {
     const bills = await Bill.find({});
@@ -41,6 +44,46 @@ const getBills = async (req, res) => {
   }
 };
 
-// Other bill-related operations like getBillById...
+// Get a single bill by ID
+const getBillById = async (req, res) => {
+  try {
+    const bill = await Bill.findById(req.params.id);
+    if (!bill) {
+      return res.status(404).json({ message: 'Bill not found' });
+    }
+    res.status(200).json(bill);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
 
-module.exports = { createBill, getBills };
+// Update a bill by ID
+const updateBill = async (req, res) => {
+  try {
+    const bill = await Bill.findByIdAndUpdate(req.params.id, req.body, {
+      new: true,
+      runValidators: true,
+    });
+    if (!bill) {
+      return res.status(404).json({ message: 'Bill not found' });
+    }
+    res.status(200).json(bill);
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+};
+
+// Delete a bill by ID
+const deleteBill = async (req, res) => {
+  try {
+    const bill = await Bill.findByIdAndDelete(req.params.id);
+    if (!bill) {
+      return res.status(404).json({ message: 'Bill not found' });
+    }
+    res.status(200).json({ message: 'Bill deleted successfully' });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+module.exports = { createBill, getBills, getBillById, updateBill, deleteBill };
